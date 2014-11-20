@@ -35,6 +35,18 @@ public class Player : MonoBehaviour {
 		yVar = yV;
 
 	}
+	public void setName(string n) {
+		this.transform.gameObject.tag = n;
+	}
+	public GameObject getObject() {
+		return this.gameObject;
+	}
+	public void setColor(Color col) {
+		GetComponent<SpriteRenderer>().color = col;
+	}
+	public Color getColor() {
+		return GetComponent < SpriteRenderer > ().color;
+	}
 	public int[] getGridPosition() {
 		int[] arr = new int[2];
 		arr [0] = xVar;

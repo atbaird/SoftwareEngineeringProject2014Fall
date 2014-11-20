@@ -15,6 +15,9 @@ public class Cell : MonoBehaviour {
 		y = yVar;
 		this.transform.position = new Vector2 (x, y);
 	}
+	public GameObject getGameObject() {
+		return this.gameObject;
+	}
 	public float[] getPosition() {
 		float[] arr = new float[2];
 		arr[0] = x;
