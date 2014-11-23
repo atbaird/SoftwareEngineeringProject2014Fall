@@ -22,7 +22,7 @@ public class Player : MonoBehaviour {
 	public void setPosition(float xV, float yV) {
 		x = xV;
 		y = yV;
-		this.transform.position = new Vector2 (x, y);
+		this.transform.position = new Vector3 (x, y, 1);
 	}
 	public float[] getPosition() {
 		float[] arr = new float[2];

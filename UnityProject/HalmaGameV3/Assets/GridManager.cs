@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class GridManager : MonoBehaviour {
-	public Cell[,] cells;
+	public GameObject[,] cells;
 	public List<Player> player1;
 	public List<Player> player2;
 	public Location[] des1;
@@ -96,7 +96,6 @@ public class GridManager : MonoBehaviour {
 			if(j < limit) {
 				player1[j].setGridPosition (locs1[i].getX (), locs1[i].getY ());
 				j++;
-				Debug.Log(locs1[i].getX () + " " + locs1[i].getY());
 			}
 		}
 		j = 0;
@@ -127,33 +126,18 @@ public class GridManager : MonoBehaviour {
 	}
 	
 	public void loadGrid() {
-		Cell[] cellScripts = FindObjectsOfType (typeof(Cell)) as Cell[];
-		cells = new Cell [xDim, yDim];
-		int numOfCells = cellScripts.GetLength (0);
-
-		while(cellScripts.GetLength(0) < (xDim * yDim)) {
-			Vector3 vec = new Vector3(0, 0, 0);
-			GameObject obj = Instantiate (cellCell, vec, Quaternion.identity) as GameObject;
-			cellScripts = FindObjectsOfType (typeof(Cell)) as Cell[];
-		}
-		Cell[] cellScript = FindObjectsOfType (typeof(Cell)) as Cell[];
-
-		float[] size = cellScript[0].getSize ();
-		int start = 0;
+		GameObject cellCopy = cellCell.gameObject;
+		cells = new GameObject[xDim, yDim];
+		float[] size = (cellCell.GetComponent("Cell") as Cell).getSize ();
 		for(int i = 0; i < xDim; i++) {
 			for(int j = 0; j < yDim; j++) {
-				float posX = i * size[0];
-				float posY = j * size[1];
-				if(start >= numOfCells) {
-					break;
-				} else {
-					cells[i,j] = cellScript[start];
-					cells[i,j].setPosition (posX, posY);
-					start++;
-				}
-			}
-			if(start >= numOfCells) {
-				break;
+				Vector3 vec = new Vector3(i * size[0],j * size[1],0);
+				GameObject cellClone = Instantiate (cellCopy,vec , Quaternion.identity) as GameObject;
+				//cellClone1.parent = Camera.main.transform; //makes cells disappear from view for some reason
+				cells[i,j] = cellClone;
+				(cells[i,j].GetComponent ("Cell") as Cell).setPosition (i * size[0], j * size[1]);
+				float[] flo = (cells[i,j].GetComponent ("Cell") as Cell).getPosition();
+				Debug.Log (flo[0] + " " + flo[1]);
 			}
 		}
 	}
@@ -295,6 +279,8 @@ public class GridManager : MonoBehaviour {
 				Debug.Log ("Hit object: " + hit.collider.gameObject.name);
 				
 			}
+			float[] flo = (cells[0,1].GetComponent("Cell") as Cell).getRealPosition ();
+			Debug.Log (flo[0] + " " + flo[1]);
 		}
 	}
 }
