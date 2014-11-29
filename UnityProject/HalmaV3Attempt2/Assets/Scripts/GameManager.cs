@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour {
 	int xPar, yPar;
 	Color[] p1Col, p2Col;
 	Piece[] p1, p2;
+	int numP1, numP2;
+	Piece sel;
 
 	// Use this for initialization
 	void Start () {
@@ -19,13 +21,16 @@ public class GameManager : MonoBehaviour {
 		//Pieces
 		GameObject[] player1 = GameObject.FindGameObjectsWithTag ("Player_1_Piece");
 		GameObject[] player2 = GameObject.FindGameObjectsWithTag ("Player_2_Piece");
+		numP1 = 9;
+		numP2 = 9;
 
+		sel = null;
 		p1Col = new Color [3];
 		p1Col[0] = new Color(0,0,0);
 		p1Col[1] = new Color(163,163,163);
 		p1Col [2] = new Color (0,253,33);
 		p1 = new Piece [9];
-		for(int i = 0; i < 9; i++) {
+		for(int i = 0; i < numP1; i++) {
 			GameObject o = player1[i];
 			Piece p = new Piece(o, p1Col);
 			p1[i] = p;
@@ -36,7 +41,7 @@ public class GameManager : MonoBehaviour {
 		p2Col [1] = new Color (255,153,0);
 		p2Col [2] = new Color (0,223,255);
 		p2 = new Piece[9];
-		for(int i = 0; i < 9; i++) {
+		for(int i = 0; i < numP2; i++) {
 			GameObject o = player2[i];
 			Piece p = new Piece(o, p2Col);
 			p2[i] = p;
@@ -44,10 +49,99 @@ public class GameManager : MonoBehaviour {
 
 		read = true;
 	}
-	
+	Vector3 getMousePos() {
+		Vector3 mPos = Input.mousePosition;
+		mPos.z = 10.0f;
+		mPos = Camera.main.ScreenToWorldPoint (mPos);
+		return mPos;
+	}
+	bool determineIfClickPiece(Vector3 mPos) {
+		bool selected = false;
+		for(int i = 0; i < numP1; i++) {
+			if(selected == true) {
+				break;
+			}
+			Location loc = p1[i].getLoc ();
+			if(loc.getX () <= mPos.x && (loc.getX () + 1) > mPos.x
+			   && loc.getY() <= mPos.y && (loc.getY () +1) > mPos.y) {
+				selected = true;
+				if(sel != null) {
+					sel.setColor (0);
+				}
+				sel = p1[i];
+			}
+		}
+		
+		for(int i = 0; i < numP2; i++) {
+			if(selected == true) {
+				break;
+			}
+			Location loc = p2[i].getLoc ();
+			if(loc.getX () <= mPos.x && (loc.getX () + 1) > mPos.x
+			   && loc.getY() <= mPos.y && (loc.getY () +1) > mPos.y) {
+				selected = true;
+				if(sel != null) {
+					sel.setColor (0);
+				}
+				sel = p2[i];
+			}
+		}
+		return selected;
+	}
+	bool determineIfLocWithinStepRange(Vector3 mPos) {
+		float x = (int)(mPos.x) - sel.getLoc ().getX ();
+		float y = (int)(mPos.y) - sel.getLoc ().getY ();
+		if(Mathf.Abs (x) <= 1 && Mathf.Abs (y) <=1) {
+			bool occupied = false;
+			for(int i = 0; i < numP1; i++) {
+				if(occupied == true) {
+					break;
+				}
+				Location loc = p1[i].getLoc ();
+				if(x == loc.getX() && y == loc.getY ()) {
+					occupied = true;
+				}
+			}
+			for(int i = 0; i < numP2; i++) {
+				if(occupied == true) {
+					break;
+				}
+				Location loc = p2[i].getLoc ();
+				if(x == loc.getX() && y == loc.getY ()) {
+					occupied = true;
+				}
+			}
+			if(occupied == false) {
+				Location loc = new Location(x,y);
+				sel.setLocation (loc);
+				sel.setColor (0);
+				sel = null;
+			}
+		}
+		return false;
+	}
+
 	// Update is called once per frame
 	void Update () {
-	
+		if(Input.GetMouseButtonDown (0)) {
+			Vector3 mPos = getMousePos ();
+			if(sel == null) {
+				determineIfClickPiece (mPos);
+				if(sel != null) {
+					sel.setColor (1);
+				}
+			} else {
+				bool isPiece = determineIfClickPiece (mPos);
+				if(isPiece == false) {
+					bool isStep = determineIfLocWithinStepRange (mPos);
+					if(isStep == false) {
+
+					}
+				} else {
+					sel.setColor (1);
+				}
+			}
+		}
 	}
 	public float[] getMaxGridSize() {
 		float[] arr = new float[2];
@@ -119,7 +213,7 @@ public class Piece {
 
 	public Piece(GameObject o, Color[] cols) {
 		colors = cols;
-		obj = 0;
+		obj = o;
 		isFrozen = 0;
 		Transform t = o.transform;
 		float x = t.position.x;
@@ -134,7 +228,10 @@ public class Piece {
 	} public Piece(GameObject o, float x, float y, Color[] cols) {
 		l = new Location (x, y);
 		isFrozen = 0;
-		obj = 0;
+		obj = o;
+	}
+	public void setColor(int i) {
+		obj.renderer.material.color = colors [i];
 	}
 	public Location getLoc() {
 		return l;
