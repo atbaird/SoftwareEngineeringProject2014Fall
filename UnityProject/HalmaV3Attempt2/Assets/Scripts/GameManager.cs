@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour {
 			Debug.Log ("WWW Error: " + www.error);
 		}
 	}
-	void waitForMove(Piece[] pieces, Piece[] enemy, Location[] des, string url) {
+	/*void waitForMove(Piece[] pieces, Piece[] enemy, Location[] des, string url) {
 		WWWForm form = new WWWForm ();
 		//form.AddField("var1", "value1");
 		//board params
@@ -30,30 +30,29 @@ public class GameManager : MonoBehaviour {
 		//pieces
 		Piece[] pic = getPiecesNotFrozen (pieces);
 		enemy = getPiecesNotFrozen (enemy);
-		int[,] pArr = convertPiecesToIntArrArr (pic);
-		int[,] eArr = convertPiecesToIntArrArr (enemy);
+		string[] pArr = convertPiecesToStringArr (pic);
+		string[] eArr = convertPiecesToStringArr (enemy);
 		form.AddField ("pieces", pArr);
 		form.AddField ("enemy", eArr);
 		//destination
-		int[,] dI = convertDesToIntArrArr (des);
+		string[] dI = convertDesToStringArr (des);
 		form.AddField ("des", dI);
 		WWW www = new WWW (url, form);
-	}
-	int[,] convertDesToIntArrArr(Location[] des) {
-		int[,] arr = new int[des.Length, 2];
+	}*/
+	string[] convertDesToStringArr(Location[] des) {
+		string[] ar = new string[des.Length];
 		for(int i = 0; i < des.Length; i++) {
-			arr[i,0] = des[i].getX ();
-			arr[i,1] = des[i].getY ();
+			ar[i] = "{x:"+(int)des[i].getX ()+",y:"+(int)des[i].getY ()+"}";
 		}
-		return arr;
+		return ar;
 	}
-	int[,] convertPiecesToIntArrArr(Piece[] pieces) {
-		int[,] arr = new int[pieces.Length, 2];
+	string[] convertPiecesToStringArr(Piece[] pieces) {
+		string[] ar = new string[pieces.Length];
 		for(int i = 0; i < pieces.Length; i++) {
-			arr[i,'x'] = (int)pieces[i].getLoc ().getX ();
-			arr[i,'y'] = (int)pieces[i].getLoc ().getY ();
+			Location loc = pieces[i].getLoc ();
+			ar[i] = "{x:"+(int)loc.getX ()+",y:"+(int)loc.getY ()+"}";
 		}
-		return arr;
+		return ar;
 	}
 	Piece[] getPiecesNotFrozen(Piece[] pieces) {
 		int notFrozen = getNumNotFrozen (pieces);
@@ -476,24 +475,31 @@ public class Piece {
 	}
 }
 
-public class Player {
-	Piece[] pieces;
-
-	public Player(Piece[] pics) {
-		pieces = pics;
+public class IceBlock {
+	GameObject block;
+	bool used;
+	Piece frozenBy;
+	public IceBlock(GameObject o) {
+		block = o;
+		used = false;
+		frozenBy = null;
 	}
-	public Piece[] getPieces() {
-		return pieces;
+	public bool isUsed() {
+		return used;
 	}
-	public bool PieceInLocation(Location loc) {
-		bool isThere = false;
-		foreach(Piece pic in pieces) {
-			isThere = pic.compareLocation (loc);
-			if(isThere == true) {
-				break;
-			}
+	public void setUsed(Piece pec) {
+		if(pec.isThisFrozen() == true) {
+			used = true;
+			frozenBy = pec;
+			Location loc = pec.getLoc ();
+			block.transform.position = new Vector3(loc.getX (), loc.getY (), 2f);
 		}
-		return isThere;
 	}
-
+	public void checkStillVal() {
+		if(frozenBy != null && frozenBy.isThisFrozen() == false) {
+			block.transform.position = new Vector3(-30, -20, 2f);
+			frozenBy = null;
+			used = false;
+		}
+	}
 }
