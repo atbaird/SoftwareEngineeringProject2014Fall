@@ -26,9 +26,9 @@ public class GameManager : MonoBehaviour {
 
 		sel = null;
 		p1Col = new Color [3];
-		p1Col[0] = new Color(0,0,0);
-		p1Col[1] = new Color(163,163,163);
-		p1Col [2] = new Color (0,253,33);
+		p1Col[0] = new Color(255f,255f,255f);
+		p1Col[1] = new Color(139f,139f,139f);
+		p1Col [2] = new Color (0f,253f,33f);
 		p1 = new Piece [9];
 		for(int i = 0; i < numP1; i++) {
 			GameObject o = player1[i];
@@ -37,9 +37,9 @@ public class GameManager : MonoBehaviour {
 		}
 
 		p2Col = new Color [3];
-		p2Col [0] = new Color (255,0,0);
-		p2Col [1] = new Color (255,153,0);
-		p2Col [2] = new Color (0,223,255);
+		p2Col [0] = new Color (255f,0f,0f);
+		p2Col [1] = new Color (255f,153f,0f);
+		p2Col [2] = new Color (0f,223f,255f);
 		p2 = new Piece[9];
 		for(int i = 0; i < numP2; i++) {
 			GameObject o = player2[i];
@@ -62,8 +62,8 @@ public class GameManager : MonoBehaviour {
 				break;
 			}
 			Location loc = p1[i].getLoc ();
-			if(loc.getX () <= mPos.x && (loc.getX () + 1) > mPos.x
-			   && loc.getY() <= mPos.y && (loc.getY () +1) > mPos.y) {
+			if(loc.getX () == Mathf.Floor (mPos.x)
+			   && loc.getY() == Mathf.Floor (mPos.y)) {
 				selected = true;
 				if(sel != null) {
 					sel.setColor (0);
@@ -77,8 +77,8 @@ public class GameManager : MonoBehaviour {
 				break;
 			}
 			Location loc = p2[i].getLoc ();
-			if(loc.getX () <= mPos.x && (loc.getX () + 1) > mPos.x
-			   && loc.getY() <= mPos.y && (loc.getY () +1) > mPos.y) {
+			if(loc.getX () == Mathf.Floor (mPos.x)
+			   && loc.getY() == Mathf.Floor (mPos.y)) {
 				selected = true;
 				if(sel != null) {
 					sel.setColor (0);
@@ -91,14 +91,14 @@ public class GameManager : MonoBehaviour {
 	bool determineIfLocWithinStepRange(Vector3 mPos) {
 		float x = (int)(mPos.x) - sel.getLoc ().getX ();
 		float y = (int)(mPos.y) - sel.getLoc ().getY ();
-		if(Mathf.Abs (x) <= 1 && Mathf.Abs (y) <=1) {
+		if(Mathf.Abs (x) <= 1 && Mathf.Abs (y) <=1 && mPos.x <xPar && mPos.y < yPar && mPos.x >=0 && mPos.y >=0) {
 			bool occupied = false;
 			for(int i = 0; i < numP1; i++) {
 				if(occupied == true) {
 					break;
 				}
 				Location loc = p1[i].getLoc ();
-				if(x == loc.getX() && y == loc.getY ()) {
+				if((int)(mPos.x) == loc.getX() && (int)(mPos.y) == loc.getY ()) {
 					occupied = true;
 				}
 			}
@@ -107,12 +107,12 @@ public class GameManager : MonoBehaviour {
 					break;
 				}
 				Location loc = p2[i].getLoc ();
-				if(x == loc.getX() && y == loc.getY ()) {
+				if((int)(mPos.x) == loc.getX() && (int)(mPos.y) == loc.getY ()) {
 					occupied = true;
 				}
 			}
 			if(occupied == false) {
-				Location loc = new Location(x,y);
+				Location loc = new Location((int)(mPos.x),(int)(mPos.y));
 				sel.setLocation (loc);
 				sel.setColor (0);
 				sel = null;
@@ -135,6 +135,8 @@ public class GameManager : MonoBehaviour {
 				if(isPiece == false) {
 					bool isStep = determineIfLocWithinStepRange (mPos);
 					if(isStep == false) {
+
+					} else {
 
 					}
 				} else {
@@ -210,7 +212,6 @@ public class Piece {
 	int isFrozen;
 	Color[] colors;
 
-
 	public Piece(GameObject o, Color[] cols) {
 		colors = cols;
 		obj = o;
@@ -218,20 +219,10 @@ public class Piece {
 		Transform t = o.transform;
 		float x = t.position.x;
 		float y = t.position.y;
-		l = new Location (x,y);
-	}
-	public Piece(GameObject o, Location loc, Color[] cols) {
-		obj = o;
-		isFrozen = 0;
-		l = loc;
-		colors = cols;
-	} public Piece(GameObject o, float x, float y, Color[] cols) {
 		l = new Location (x, y);
-		isFrozen = 0;
-		obj = o;
 	}
 	public void setColor(int i) {
-		obj.renderer.material.color = colors [i];
+		obj.GetComponent<SpriteRenderer>().color = colors [i];
 	}
 	public Location getLoc() {
 		return l;
