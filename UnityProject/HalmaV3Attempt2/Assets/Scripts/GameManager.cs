@@ -11,9 +11,90 @@ public class GameManager : MonoBehaviour {
 	int numP1, numP2, numD1, numD2;
 	Piece sel;
 
+	IEnumerator WaitForRequest(WWW www) {
+		//http://answers.unity3d.com/questions/11021/how-can-i-send-and-receive-data-to-and-from-a-url.html
+		yield return www;
+
+		if (www.error == null) {
+			Debug.Log ("WWW Ok!: " + www.text);
+		} else {
+			Debug.Log ("WWW Error: " + www.error);
+		}
+	}
+	void waitForMove(Piece[] pieces, Piece[] enemy, Location[] des, string url) {
+		WWWForm form = new WWWForm ();
+		//form.AddField("var1", "value1");
+		//board params
+		form.AddField ("xParam", xPar);
+		form.AddField ("yParam", yPar);
+		//pieces
+		Piece[] pic = getPiecesNotFrozen (pieces);
+		enemy = getPiecesNotFrozen (enemy);
+		int[,] pArr = convertPiecesToIntArrArr (pic);
+		int[,] eArr = convertPiecesToIntArrArr (enemy);
+		form.AddField ("pieces", pArr);
+		form.AddField ("enemy", eArr);
+		//destination
+		int[,] dI = convertDesToIntArrArr (des);
+		form.AddField ("des", dI);
+		WWW www = new WWW (url, form);
+	}
+	int[,] convertDesToIntArrArr(Location[] des) {
+		int[,] arr = new int[des.Length, 2];
+		for(int i = 0; i < des.Length; i++) {
+			arr[i,0] = des[i].getX ();
+			arr[i,1] = des[i].getY ();
+		}
+		return arr;
+	}
+	int[,] convertPiecesToIntArrArr(Piece[] pieces) {
+		int[,] arr = new int[pieces.Length, 2];
+		for(int i = 0; i < pieces.Length; i++) {
+			arr[i,'x'] = (int)pieces[i].getLoc ().getX ();
+			arr[i,'y'] = (int)pieces[i].getLoc ().getY ();
+		}
+		return arr;
+	}
+	Piece[] getPiecesNotFrozen(Piece[] pieces) {
+		int notFrozen = getNumNotFrozen (pieces);
+		Piece[] eh = new Piece[notFrozen];
+		int k = 0;
+		for(int i = 0; i < pieces.Length; i++) {
+			if(pieces[i].isThisFrozen() == false) {
+				eh[k] = pieces[i];
+				k++;
+			}
+		}
+		return eh;
+	}
+	int getNumNotFrozen(Piece[] pieces) {
+		int notFrozen = 0;
+		for(int i = 0; i < pieces.Length; i++) {
+			if(pieces[i].isThisFrozen() == false) {
+				notFrozen++;
+			}
+		}
+		return notFrozen;
+	}
+
 	// Use this for initialization
 	void Start () {
 		read = false;
+
+		//AI/URL
+		string AI1 = "local";
+		string AI2 = "local";
+
+		if(AI1 == "local") {
+
+		} else {
+
+		}
+		if(AI2 == "local") {
+
+		} else {
+
+		}
 
 		//Destination Locations
 		numD1 = 9;
