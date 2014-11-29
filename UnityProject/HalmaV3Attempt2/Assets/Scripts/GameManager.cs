@@ -88,10 +88,78 @@ public class GameManager : MonoBehaviour {
 		}
 		return selected;
 	}
+	bool determineIfPieceBlocks(Vector3 mPos) {
+		if(mPos.x < 0 || mPos.y < 0 || mPos.x >= xPar || mPos.y >= yPar) {
+			return true;
+		}
+		bool blocked = false;
+		for(int i = 0; i < numP1; i++) {
+			if(blocked == true) {
+				break;
+			}
+			Location loc = p1[i].getLoc ();
+			if(loc.getX () == Mathf.Floor (mPos.x)
+			   && loc.getY() == Mathf.Floor (mPos.y)) {
+				blocked = true;
+			}
+		}
+		for(int i = 0; i < numP2; i++) {
+			if(blocked == true) {
+				break;
+			}
+			Location loc = p1[i].getLoc ();
+			if(loc.getX () == Mathf.Floor (mPos.x)
+			   && loc.getY() == Mathf.Floor (mPos.y)) {
+				blocked = true;
+			}
+		}
+		return blocked;
+	}
+
+	bool determinePieceJump(Vector3 mPos) {
+		Location selLoc = sel.getLoc ();
+		float xDif = Mathf.Floor (mPos.x) - selLoc.getX ();
+		float yDif = Mathf.Floor (mPos.y) - selLoc.getY ();
+		if(Mathf.Abs (xDif) <= 2 && Mathf.Abs (yDif) <= 2 
+		   && mPos.x < xPar && mPos.y < yPar && mPos.x >= 0 && mPos.y >= 0) {
+			float xOne = mPos.x - (xDif/2);
+			float yOne = mPos.y - (yDif/2);
+			Vector3 stepSpace = new Vector3(xOne, yOne, 10f);
+			bool PieceBetween = determineIfPieceBlocks (stepSpace);
+			if(PieceBetween == true) {
+				bool isBlocked = false;
+				for(int i = 0; i < numP1; i++) {
+					if(isBlocked == true) {
+						break;
+					}
+					Location loc = p1[i].getLoc ();
+					if(Mathf.Floor (mPos.x) == loc.getX () && Mathf.Floor (mPos.y) == loc.getY ()) {
+						isBlocked = true;
+					}
+				}
+				for(int i = 0; i < numP2; i++) {
+					if(isBlocked == true) {
+						break;
+					}
+					Location loc = p2[i].getLoc ();
+					if(Mathf.Floor (mPos.x) == loc.getX () && Mathf.Floor (mPos.y) == loc.getY ()) {
+						isBlocked = true;
+					}
+				}
+				if(isBlocked == false) {
+					Location loc = new Location(Mathf.Floor (mPos.x), Mathf.Floor (mPos.y));
+					sel.setLocation (loc);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	bool determineIfLocWithinStepRange(Vector3 mPos) {
 		float x = (int)(mPos.x) - sel.getLoc ().getX ();
 		float y = (int)(mPos.y) - sel.getLoc ().getY ();
-		if(Mathf.Abs (x) <= 1 && Mathf.Abs (y) <=1 && mPos.x <xPar && mPos.y < yPar && mPos.x >=0 && mPos.y >=0) {
+		if(Mathf.Abs (x) <= 1 && Mathf.Abs (y) <=1 
+		   && mPos.x <xPar && mPos.y < yPar && mPos.x >=0 && mPos.y >=0) {
 			bool occupied = false;
 			for(int i = 0; i < numP1; i++) {
 				if(occupied == true) {
@@ -116,6 +184,7 @@ public class GameManager : MonoBehaviour {
 				sel.setLocation (loc);
 				sel.setColor (0);
 				sel = null;
+				return true;
 			}
 		}
 		return false;
@@ -135,9 +204,12 @@ public class GameManager : MonoBehaviour {
 				if(isPiece == false) {
 					bool isStep = determineIfLocWithinStepRange (mPos);
 					if(isStep == false) {
-
+						determinePieceJump (mPos);
 					} else {
-
+						if(sel != null) {
+							sel.setColor (0);
+							sel = null;
+						}
 					}
 				} else {
 					sel.setColor (1);
