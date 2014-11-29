@@ -5,14 +5,37 @@ using System.Collections.Generic;
 public class GameManager : MonoBehaviour {
 	bool read;
 	int xPar, yPar;
+	Location[] d1, d2;
 	Color[] p1Col, p2Col;
 	Piece[] p1, p2;
-	int numP1, numP2;
+	int numP1, numP2, numD1, numD2;
 	Piece sel;
 
 	// Use this for initialization
 	void Start () {
 		read = false;
+
+		//Destination Locations
+		numD1 = 9;
+		numD2 = 9;
+		d1 = new Location[9];
+		d2 = new Location[9];
+		int k = 0;
+
+		for(int i = 9; i >= 7; i--) {
+			for(int j = 9; j >= 7; j--) {
+				d1[k] = new Location(j, i);
+				k++;
+			}
+		}
+
+		k = 0;
+		for(int i = 9; i >= 7; i--) { //y
+			for(int j = 0; j <= 2; j++) { //x
+				d2[k] = new Location(j,i);
+				k++;
+			}
+		}
 
 		//Grid
 		xPar = 10;
@@ -27,7 +50,7 @@ public class GameManager : MonoBehaviour {
 		sel = null;
 		p1Col = new Color [3];
 		p1Col[0] = new Color(255f,255f,255f);
-		p1Col[1] = new Color(139f,139f,139f);
+		p1Col[1] = new Color(139f,200f,139f);
 		p1Col [2] = new Color (0f,253f,33f);
 		p1 = new Piece [9];
 		for(int i = 0; i < numP1; i++) {
@@ -55,36 +78,40 @@ public class GameManager : MonoBehaviour {
 		mPos = Camera.main.ScreenToWorldPoint (mPos);
 		return mPos;
 	}
-	bool determineIfClickPiece(Vector3 mPos) {
-		bool selected = false;
+	bool selectFromPlayer1Only(Vector3 mPos) {
 		for(int i = 0; i < numP1; i++) {
-			if(selected == true) {
-				break;
-			}
 			Location loc = p1[i].getLoc ();
-			if(loc.getX () == Mathf.Floor (mPos.x)
-			   && loc.getY() == Mathf.Floor (mPos.y)) {
-				selected = true;
+			if(loc.getX () == Mathf.Floor (mPos.x) && loc.getY () == Mathf.Floor (mPos.y)) {
 				if(sel != null) {
 					sel.setColor (0);
+					sel = null;
 				}
 				sel = p1[i];
+				sel.setColor (1);
+				return true;
 			}
 		}
-		
+		return false;
+	}
+	bool selectFromPlayer2Only(Vector3 mPos) {
 		for(int i = 0; i < numP2; i++) {
-			if(selected == true) {
-				break;
-			}
 			Location loc = p2[i].getLoc ();
-			if(loc.getX () == Mathf.Floor (mPos.x)
-			   && loc.getY() == Mathf.Floor (mPos.y)) {
-				selected = true;
+			if(loc.getX () == Mathf.Floor (mPos.x) && loc.getY () == Mathf.Floor (mPos.y)) {
 				if(sel != null) {
 					sel.setColor (0);
+					sel = null;
 				}
 				sel = p2[i];
+				sel.setColor (1);
+				return true;
 			}
+		}
+		return false;
+	}
+	bool determineIfClickPiece(Vector3 mPos) {
+		bool selected = selectFromPlayer1Only (mPos);
+		if(selected == false) {
+			selected = selectFromPlayer2Only (mPos);
 		}
 		return selected;
 	}
@@ -190,8 +217,45 @@ public class GameManager : MonoBehaviour {
 		return false;
 	}
 
+	void resetToBasicColor() {
+		for(int i = 0; i <numP1; i++) {
+			p1[i].setColor (0);
+		}
+		for(int i =0; i < numP2; i++) {
+			p2[i].setColor (0);
+		}
+	}
+
+	void testForDest() {
+		resetToBasicColor ();
+		for(int i = 0; i < numD1; i++) {
+			for(int j = 0; j < numP1; j++) {
+				Location loc = p1[j].getLoc ();
+				if(loc.getX () == d1[i].getX () && loc.getY () == d1[i].getY ()) {
+					p1[j].setColor (2);
+				}
+			}
+		}
+
+		for(int i = 0; i < numD2; i++) {
+			for(int j = 0; j < numP2; j++) {
+				
+				Location loc = p2[j].getLoc ();
+				if(loc.getX () == d2[i].getX () && loc.getY () == d2[i].getY ()) {
+					p2[j].setColor (2);
+				}
+			}
+		}
+
+		if(sel != null) {
+			sel.setColor (1);
+		}
+	}
+
 	// Update is called once per frame
 	void Update () {
+		testForDest ();
+
 		if(Input.GetMouseButtonDown (0)) {
 			Vector3 mPos = getMousePos ();
 			if(sel == null) {
