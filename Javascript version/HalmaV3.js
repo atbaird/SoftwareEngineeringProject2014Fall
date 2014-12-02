@@ -405,7 +405,7 @@ function siphonPostCollisionMoves(moves1, moves2) {
                 collision = moves1[i];
                 moves1[i].frozen = 2;
                 moves2[j].frozen = 2;
-                var ran = Math.ran() % 2;
+                var ran = Math.random() % 2;
                 if(ran == 1) {
                     gPieces[i].x -= 1;
                 } else if(ran == 0) {
@@ -419,7 +419,7 @@ function siphonPostCollisionMoves(moves1, moves2) {
         collision = moves1[i];
         moves1[i].frozen = 2;
         moves2[j].frozen = 2;
-        var ran = Math.ran() % 2;
+        var ran = Math.random() % 2;
         if(ran == 1) {
             gPieces[i].x -= 1;
         } else if(ran == 0) {
@@ -460,10 +460,12 @@ function makeMove() {
     var teamSpan         = document.getElementById("AITeamName");
     teamSpan.innerHTML   = gTeamList[currentTeam].name;
     teamSpan.style.color = gTeamList[currentTeam].color;
+
+    console.log(move);
     
     document.getElementById("responseString").innerHTML = JSON.stringify(move);
 
-    var teamSpan1 = document.getElementById("AiTeamName1");
+    var teamSpan1 = document.getElementById("AITeamName1");
     teamSpan1.innerHTML = gTeamList[currentTeam1].name;
     teamSpan.style.color = gTeamList[currentTeam1].color;
 
