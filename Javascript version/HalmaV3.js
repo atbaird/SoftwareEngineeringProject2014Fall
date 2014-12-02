@@ -399,12 +399,12 @@ function siphonPostCollisionMoves(moves1, moves2) {
     var boolCatch = false;
     var collision = new Cell(-1,-1,0);
     for(var i = 0; i < moves1.length; i++) {
-        for(var j = i + 1; j < i+2 && j < moves2.length; j++) {
+        for(var j = i; j < i+1 && j < moves2.length; j++) {
             if(gPieces[i].x == gPieces[j].x && gPieces[i].y == gPieces[j].y) {
                 boolCatch = true;
                 collision = moves1[i];
-                moves1[i].Frozen = 2;
-                moves2[j].Frozen = 2;
+                moves1[i].frozen = 2;
+                moves2[j].frozen = 2;
                 var ran = Math.ran() % 2;
                 if(ran == 1) {
                     gPieces[i].x -= 1;
@@ -412,6 +412,18 @@ function siphonPostCollisionMoves(moves1, moves2) {
                     gPieces[j].x +=1;
                 }
             }
+        }
+    }
+    if(moves1[moves1.length - 1].x == moves2[moves2.length-1].x && moves1[moves1.length-1].y == moves2[moves2.length-1].y) {
+        boolCatch = true;
+        collision = moves1[i];
+        moves1[i].frozen = 2;
+        moves2[j].frozen = 2;
+        var ran = Math.ran() % 2;
+        if(ran == 1) {
+            gPieces[i].x -= 1;
+        } else if(ran == 0) {
+            gPieces[j].x +=1;
         }
     }
     return collision;
@@ -480,7 +492,7 @@ function makeMove() {
         //    need isValidJump(fromP, toP) with some piece between
         var moves = [];
         for(var i = 0; i < movePieceLocs.length; i++) {
-            moves.push(new Cell(movePieceLocs[i].y, movePieceLocs[i].x, movePiecesLocs[i].Frozen));
+            moves.push(new Cell(movePieceLocs[i].y, movePieceLocs[i].x, movePiecesLocs[i].frozen));
         }
 
         var foundPiece = false;
