@@ -399,17 +399,19 @@ function siphonPostCollisionMoves(moves1, moves2) {
     var boolCatch = false;
     var collision = new Cell(-1,-1,0);
     for(var i = 0; i < moves1.length; i++) {
-        for(var j = i; j < i+1; j++) {
-            if(moves1[i].x == moves2[i].x && moves1[i].y == moves2[i].y) {
+        for(var j = i + 1; j < i+2 && j < moves2.length; j++) {
+            if(gPieces[i].x == gPieces[j].x && gPieces[i].y == gPieces[j].y) {
                 boolCatch = true;
                 collision = moves1[i];
-                moves2.splice(j, moves2.length - j);
-                moves2[j-1].frozen = 2;
+                moves1[i].Frozen = 2;
+                moves2[j].Frozen = 2;
+                var ran = Math.ran() % 2;
+                if(ran == 1) {
+                    gPieces[i].x -= 1;
+                } else if(ran == 0) {
+                    gPieces[j].x +=1;
+                }
             }
-        }
-        if(boolCatch == true) {
-            moves1.splice(i, moves1.length - i);
-            moves1[i].frozen = 2;
         }
     }
     return collision;
@@ -429,14 +431,17 @@ function makeMove() {
     
     if (isGameOver() ) return;
     
-    var currentTeam = gTurnCount++ % gNumTeams; 
+    gTurnCount++;
+    var currentTeam = 0; 
+    var currentTeam1 = 1;
     // get move for current team
 
-    var currentTeam1 = (gTurnCount +1) % gNumTeams;
     unFreeze(gTeamList[currentTeam]);
     unFreeze(gTeamList[currentTeam1]);
     var move = makeAjaxPostMoveRequestNoParm(currentTeam);
     var move1 = makeAjaxPostMoveRequestNoParm(currentTeam1);
+
+    siphonPostCollisionMoves(move, move1);
 
       
     //fc: display incoming json and Team Name
@@ -475,7 +480,7 @@ function makeMove() {
         //    need isValidJump(fromP, toP) with some piece between
         var moves = [];
         for(var i = 0; i < movePieceLocs.length; i++) {
-            moves.push(new Cell(movePieceLocs[i].y, movePieceLocs[i].x, 0));
+            moves.push(new Cell(movePieceLocs[i].y, movePieceLocs[i].x, movePiecesLocs[i].Frozen));
         }
 
         var foundPiece = false;
