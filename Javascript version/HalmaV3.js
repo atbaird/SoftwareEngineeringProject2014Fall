@@ -364,8 +364,11 @@ function initGame(canvasElement, moveCountElement) {
 //    destinationCorner = $('input:radio[name=destCorner]:checked').val();
 //    piecesCorner = $('input:radio[name=pieceCorner]:checked').val();
 
-    
-   
+    var timeInterval = $("#moveInterval").val(); 
+    if(timeInterval == "")
+    	timeInterval = 5;
+    console.log(timeInterval);
+    setInterval(makeMove,timeInterval*1000); 
     if (!canvasElement) {
         canvasElement = document.createElement("canvas");
         canvasElement.id = "halma_canvas";
@@ -393,31 +396,30 @@ function make20Moves() {
        if (isGameOver() )  break;
     }
 } 
-function siphonPostCollisionMoves(arr1, arr2) {
+/*function siphonPostCollisionMoves(arr1, arr2) {
     //suppose to detect a collision, and if so, returns the location of the collision, while removing all other moves from the string.
     //pieces are frozen; value needs to be one more than actual number of turns they will be frozen for.
     var moves1 = arr1["to"];
     var moves2 = arr2["to"];
     var boolCatch = false;
     var collision = new Cell(-1,-1,0);
-
-    for(var i = 0; i < moves1['to'].length; i++) {
-        for(var j = i; j < i+1 && j < moves2['to'].length; j++) {
-            if(moves1['to'][i].x == moves2['to'][j].x && moves1['to'][i].y == moves2['to'][j].y) {
+    for(var i = 0; i < moves1.length; i++) {
+        for(var j = i; j < i+1 && j < moves2.length; j++) {
+            if(gPieces[i].x == gPieces[j].x && gPieces[i].y == gPieces[j].y) {
                 boolCatch = true;
                 collision = moves1[i];
                 moves1[i].frozen = 2;
                 moves2[j].frozen = 2;
                 var ran = Math.random() % 2;
                 if(ran == 1) {
-                    moves1[i].x -= 1;
+                    gPieces[i].x -= 1;
                 } else if(ran == 0) {
-                    moves2[j].x +=1;
+                    gPieces[j].x +=1;
                 }
             }
         }
     }
-    if(moves1['to'][moves1.length - 1].x == moves2['to'][moves2.length-1].x && moves1['to'][moves1.length-1].y == moves2['to'][moves2.length-1].y) {
+    if(moves1[moves1.length - 1].x == moves2[moves2.length-1].x && moves1[moves1.length-1].y == moves2[moves2.length-1].y) {
         boolCatch = true;
         collision = moves1[i];
         moves1[i].frozen = 2;
@@ -430,7 +432,21 @@ function siphonPostCollisionMoves(arr1, arr2) {
         }
     }
     return collision;
+}*/
+
+function collision(from1, to1, from2, tutu) {
+    $(to1).each(function(index1,val1) {
+	$(tutu).each(function(index2,val2) {
+		if(val1["x"] == val2["x"] && val1["y"] == val2["y"]) {
+			to1[index1] = from1[index1];
+			tutu[index2] = from2[index2];
+			to1[index1]["frozen"] = 1;
+			tutu[index2]["frozen"] = 1;
+		}
+	});
+    });
 }
+
 function unFreeze(moves) {
     //suppose to decrement any frozen pieces' frozen value.
     for(var i = 0; i < moves.length; i++) {
@@ -446,6 +462,7 @@ function makeMove() {
     
     if (isGameOver() ) return;
     
+    console.log("makeMove()");
     gTurnCount++;
     var currentTeam = 0; 
     var currentTeam1 = 1;
@@ -456,7 +473,8 @@ function makeMove() {
     var move = makeAjaxPostMoveRequestNoParm(currentTeam);
     var move1 = makeAjaxPostMoveRequestNoParm(currentTeam1);
 
-    siphonPostCollisionMoves(move, move1);
+    collision(move.from, move.to, move1.from, move1.to);
+    //siphonPostCollisionMoves(move, move1);
 
       
     //fc: display incoming json and Team Name
@@ -472,20 +490,14 @@ function makeMove() {
 
     document.getElementById("responseString1").innerHTML = JSON.stringify(move1);
 
-    for(var i = 0; i < move['from'].length; i++) {
-        var arr = [];
-        arr['from'] = move['from'][i];
-        arr['to'] = move['to'][i];
-
-        checkIfFoundPiece(arr);
+    for(var i = 0; i < move.to.length; i++) {
+	var singlePiece1 = {to: move.to[i], from: move.from[i]};
+	checkIfFoundPiece(singlePiece1);
+	var singlePiece2 = {to: move1.to[i], from: move1.from[i]};
+	checkIfFoundPiece(singlePiece2);
     }
-        for(var i = 0; i < move['from'].length; i++) {
-            var arr = [];
-            arr['from'] = move1['from'][i];
-            arr['to'] = move1['to'][i];
-
-            checkIfFoundPiece(arr);
-        }
+        //checkIfFoundPiece(move);
+        //checkIfFoundPiece(move1);
     }
 
         
@@ -496,10 +508,12 @@ function makeMove() {
         
         var locPiece = move.from;
         var currPieceLoc = new Cell(locPiece.y, locPiece.x, 0);
+	console.log("move.to");
+	console.log(move.to);
         
-	   console.log("currPieceLoc");
-	   console.log(currPieceLoc);
         var movePieceLocs = move.to; 
+	console.log("movePieceLocs");
+	console.log(movePieceLocs);
 
         // create moves - array of Cells where AI wants to move
         // todo: check if these are legal moves here
@@ -508,9 +522,9 @@ function makeMove() {
         //    need isValidSingleMove(fromP, toP)
         //    need isValidJump(fromP, toP) with some piece between
         var moves = [];
-        for(var i = 0; i < movePieceLocs.length; i++) {
-            moves.push(new Cell(movePieceLocs[i].y, movePieceLocs[i].x, movePieceLocs[i].frozen));
-        }
+        //for(var i = 0; i < movePieceLocs.length; i++) {
+            moves.push(new Cell(movePieceLocs.y, movePieceLocs.x, movePieceLocs.frozen));
+        //}
 
         var foundPiece = false;
         // search if desired move is for an actual piece
@@ -521,6 +535,8 @@ function makeMove() {
                 gSelectedPieceIndex = i;
                 // set piece location to last in chain
                 // todo: hold off on this until we know the last move is valid
+		console.log("moves");
+		console.log(moves);
                 gPieces[i].y = moves[moves.length - 1].y;
                 gPieces[i].x = moves[moves.length - 1].x;
                 gMoveCount += 1;
