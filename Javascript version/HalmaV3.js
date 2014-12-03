@@ -400,23 +400,24 @@ function siphonPostCollisionMoves(arr1, arr2) {
     var moves2 = arr2["to"];
     var boolCatch = false;
     var collision = new Cell(-1,-1,0);
-    for(var i = 0; i < moves1.length; i++) {
-        for(var j = i; j < i+1 && j < moves2.length; j++) {
-            if(gPieces[i].x == gPieces[j].x && gPieces[i].y == gPieces[j].y) {
+
+    for(var i = 0; i < moves1['to'].length; i++) {
+        for(var j = i; j < i+1 && j < moves2['to'].length; j++) {
+            if(moves1['to'][i].x == moves2['to'][j].x && moves1['to'][i].y == moves2['to'][j].y) {
                 boolCatch = true;
                 collision = moves1[i];
                 moves1[i].frozen = 2;
                 moves2[j].frozen = 2;
                 var ran = Math.random() % 2;
                 if(ran == 1) {
-                    gPieces[i].x -= 1;
+                    moves1[i].x -= 1;
                 } else if(ran == 0) {
-                    gPieces[j].x +=1;
+                    moves2[j].x +=1;
                 }
             }
         }
     }
-    if(moves1[moves1.length - 1].x == moves2[moves2.length-1].x && moves1[moves1.length-1].y == moves2[moves2.length-1].y) {
+    if(moves1['to'][moves1.length - 1].x == moves2['to'][moves2.length-1].x && moves1['to'][moves1.length-1].y == moves2['to'][moves2.length-1].y) {
         boolCatch = true;
         collision = moves1[i];
         moves1[i].frozen = 2;
@@ -471,8 +472,20 @@ function makeMove() {
 
     document.getElementById("responseString1").innerHTML = JSON.stringify(move1);
 
-        checkIfFoundPiece(move);
-        checkIfFoundPiece(move1);
+    for(var i = 0; i < move['from'].length; i++) {
+        var arr = [];
+        arr['from'] = move['from'][i];
+        arr['to'] = move['to'][i];
+
+        checkIfFoundPiece(arr);
+    }
+        for(var i = 0; i < move['from'].length; i++) {
+            var arr = [];
+            arr['from'] = move1['from'][i];
+            arr['to'] = move1['to'][i];
+
+            checkIfFoundPiece(arr);
+        }
     }
 
         
@@ -484,8 +497,8 @@ function makeMove() {
         var locPiece = move.from;
         var currPieceLoc = new Cell(locPiece.y, locPiece.x, 0);
         
-	console.log("currPieceLoc");
-	console.log(currPieceLoc);
+	   console.log("currPieceLoc");
+	   console.log(currPieceLoc);
         var movePieceLocs = move.to; 
 
         // create moves - array of Cells where AI wants to move
