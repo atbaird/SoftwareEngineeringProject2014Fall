@@ -393,9 +393,11 @@ function make20Moves() {
        if (isGameOver() )  break;
     }
 } 
-function siphonPostCollisionMoves(moves1, moves2) {
+function siphonPostCollisionMoves(arr1, arr2) {
     //suppose to detect a collision, and if so, returns the location of the collision, while removing all other moves from the string.
     //pieces are frozen; value needs to be one more than actual number of turns they will be frozen for.
+    var moves1 = arr1["to"];
+    var moves2 = arr2["to"];
     var boolCatch = false;
     var collision = new Cell(-1,-1,0);
     for(var i = 0; i < moves1.length; i++) {
@@ -461,8 +463,6 @@ function makeMove() {
     teamSpan.innerHTML   = gTeamList[currentTeam].name;
     teamSpan.style.color = gTeamList[currentTeam].color;
 
-    console.log(move);
-    
     document.getElementById("responseString").innerHTML = JSON.stringify(move);
 
     var teamSpan1 = document.getElementById("AITeamName1");
@@ -494,7 +494,7 @@ function makeMove() {
         //    need isValidJump(fromP, toP) with some piece between
         var moves = [];
         for(var i = 0; i < movePieceLocs.length; i++) {
-            moves.push(new Cell(movePieceLocs[i].y, movePieceLocs[i].x, movePiecesLocs[i].frozen));
+            moves.push(new Cell(movePieceLocs[i].y, movePieceLocs[i].x, movePieceLocs[i].frozen));
         }
 
         var foundPiece = false;
