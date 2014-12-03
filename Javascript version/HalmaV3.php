@@ -1,10 +1,11 @@
 <?php
         /*
-         *      Conner Knutson
-         *      33295734
-         *      Assignment 1
+         *      Alex Russell
+	 *	Conner Knutson
+	 *	Alex Baird
+	 *	Group Project
          *
-         *      http://lyle.smu.edu/~cknutson/ass1/getMove.php 
+         *      http://lyle.smu.edu/~amrussell/GroupProject/HalmaV3.php
          */
 
         $jsonString = file_get_contents("php://input");
@@ -12,10 +13,23 @@
 
         $boardSize = $myJson['boardSize'];//save boardSize
 
+	$from = $myJson['pieces'];
         $pieces = $myJson['pieces'];//save pieces into array
         $enemy = $myJson['enemy'];//save enemy pieces into array
 
         $destinations = $myJson['destinations'];//save destinations into array
+	
+	//iterates through destinations and deletes any destinations that already have a piece on them.
+	//also freezes pieces that are in a destination cell.
+	for($i = 0; $i < count($destinations); $i++){
+		for($j = 0; $j < count($pieces); $j++){
+			if($destinations[$i]["x"] == $pieces[$j]["x"] && $destinations[$i]["y"] == $pieces[$j]["y"]){
+				array_splice($destinations, $i, 1);
+				//if($i == 0 || $i == 3 || $i == 6 || $i == 9)
+				//	$pieces[$j]["frozen"] = 1;
+			}
+		}
+	}
 
         //$frozen = $myJson['frozen'];//save frozen pieces into array
 
@@ -157,10 +171,15 @@
 			$pieces[$i]["x"] = $newPieceLocation["x"];
 			$pieces[$i]["y"] = $newPieceLocation["y"];
                 }
+		$pieces[$i]["frozen"] = 0;
         }
 
+	$theReturn = array();
+	$theReturn["from"] = $from;
+	$theReturn["to"] = $pieces;
+
         //send pieces array back to UI
-        echo json_encode($pieces);
+        echo json_encode($theReturn);
 
 function calcMove($i, $canMoveH, $canJumpH, $canMoveV, $canJumpV, $canMoveD, $canJumpD, $shiftH, $shiftV, $currentPieceX, $currentPieceY){
         $newX = 0;
