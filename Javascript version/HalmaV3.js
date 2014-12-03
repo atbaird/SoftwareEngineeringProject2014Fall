@@ -484,6 +484,8 @@ function makeMove() {
         var locPiece = move.from;
         var currPieceLoc = new Cell(locPiece.y, locPiece.x, 0);
         
+	console.log("currPieceLoc");
+	console.log(currPieceLoc);
         var movePieceLocs = move.to; 
 
         // create moves - array of Cells where AI wants to move
